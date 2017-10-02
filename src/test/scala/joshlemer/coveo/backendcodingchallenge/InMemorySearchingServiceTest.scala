@@ -1,8 +1,8 @@
 package joshlemer.coveo.backendcodingchallenge
 
-import joshlemer.coveo.backendcodingchallenge.Scorer.StringScorer
 import org.scalatest.{FlatSpec, Matchers}
 
+import scala.annotation.tailrec
 import scala.collection.immutable.IndexedSeq
 import scala.util.Random
 
@@ -50,20 +50,35 @@ class InMemorySearchingServiceTest extends FlatSpec with Matchers {
       (1 to similarCities).map(_ => similarCity) ++
         (1 to (limit - similarCities)).map(_ => dissimilarCity)
 
-//    val ls = StringScorer.longestSubstring("hellga", "hello")
-//
-//    val sq = SearchQuery(queryString = "hellga", latLong = None, limit = None)
-//    val result2 = Scorer.getDefault.score(sq, similarCity)
-//    val result3 = Scorer.getDefault.score(sq, dissimilarCity)
-
     val results =
       new InMemorySearchingService(citiesWhichDifferOnlyInName, Scorer.getDefault)
         .search(SearchQuery(queryString = "hellga", latLong = None, limit = Some(limit)))
         .map(_.city)
 
     results should contain theSameElementsInOrderAs expectedResults
+  }
+  it should "show results in decreasing score" in {
 
+    def isMonotonicDescending(seq: Seq[Double]): Boolean = {
+      @tailrec
+      def inner(seq2: Seq[Double], prev: Option[Double]): Boolean =
+        (seq2, prev) match {
+          case (empty, _) if empty.isEmpty => true
+          case (nonEmpty, Some(p)) if nonEmpty.head > p => false
+          case (nonEmpty, _) => inner(nonEmpty.tail, Some(nonEmpty.head))
+        }
+      inner(seq, None)
+    }
 
+    isMonotonicDescending(searchingService.search(baseQuery.copy(limit = None))
+      .map(_.score.toDouble)) should be (true)
+
+    isMonotonicDescending(searchingService.search(baseQuery.copy(limit = Some(20)))
+        .map(_.score.toDouble)) should be (true)
+
+    isMonotonicDescending(searchingService.search(
+      baseQuery.copy(latLong = Some(LatLong(1.2, 3.4)), limit = Some(20)))
+      .map(_.score.toDouble)) should be (true)
   }
 
 }
