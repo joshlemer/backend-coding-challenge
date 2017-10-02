@@ -7,6 +7,8 @@ case class LatLong(latitude: Double, longitude: Double) {
 }
 
 object LatLong {
+
+  /** Took the algorithm from the internet in a java snippet and converted to Scala */
   def distance(a: LatLong, b: LatLong): Double = {
     import Math._
 
