@@ -29,7 +29,10 @@ case class Geoname(
   tz: String,
   modified_at: String
 ) {
-  def toCity: City = City(name, LatLong(lat, long))
+
+  def latLong: LatLong = LatLong(lat, long)
+
+  def toCity: City = City(name, latLong)
 }
 
 object Geoname {

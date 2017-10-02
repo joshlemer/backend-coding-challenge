@@ -2,6 +2,8 @@ package joshlemer.coveo.backendcodingchallenge
 
 import scala.language.higherKinds
 
+import ch.hsr.geohash._
+
 case class Score private (toDouble: Double) extends AnyVal
 
 object Score {
