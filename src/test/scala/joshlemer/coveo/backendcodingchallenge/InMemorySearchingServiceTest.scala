@@ -26,13 +26,13 @@ class InMemorySearchingServiceTest extends FlatSpec with Matchers {
 
     val limitedQuery = baseQuery.copy(limit = Some(limit))
 
-    searchingService.search(limitedQuery) should have length 5
+    searchingService.search(limitedQuery).searchResults should have length 5
   }
   it should "produce a lot of records when there's no limit" in {
 
     val limitedQuery = baseQuery.copy(limit = None)
 
-    searchingService.search(limitedQuery) should have length totalRecords
+    searchingService.search(limitedQuery).searchResults should have length totalRecords
   }
   it should "favor similar strings over non similar strings" in {
 
@@ -53,6 +53,7 @@ class InMemorySearchingServiceTest extends FlatSpec with Matchers {
     val results =
       new InMemorySearchingService(citiesWhichDifferOnlyInName, Scorer.getDefault)
         .search(SearchQuery(queryString = "hellga", latLong = None, limit = Some(limit)))
+        .searchResults
         .map(_.city)
 
     results should contain theSameElementsInOrderAs expectedResults
@@ -71,13 +72,16 @@ class InMemorySearchingServiceTest extends FlatSpec with Matchers {
     }
 
     isMonotonicDescending(searchingService.search(baseQuery.copy(limit = None))
+      .searchResults
       .map(_.score.toDouble)) should be (true)
 
     isMonotonicDescending(searchingService.search(baseQuery.copy(limit = Some(20)))
-        .map(_.score.toDouble)) should be (true)
+      .searchResults
+      .map(_.score.toDouble)) should be (true)
 
     isMonotonicDescending(searchingService.search(
       baseQuery.copy(latLong = Some(LatLong(1.2, 3.4)), limit = Some(20)))
+      .searchResults
       .map(_.score.toDouble)) should be (true)
   }
 

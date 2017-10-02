@@ -84,3 +84,13 @@ These responses are meant to provide guidance. The exact values can vary based o
 
 Begin by forking this repo and cloning your fork. GitHub has apps for [Mac](http://mac.github.com/) and
 [Windows](http://windows.github.com/) that make this easier.
+
+## Instructions:
+
+To run the application you'll need JDK 1.8, and sbt installed,
+once you have those things set up you should be able to start up the application with
+
+```
+sbt run
+```
+

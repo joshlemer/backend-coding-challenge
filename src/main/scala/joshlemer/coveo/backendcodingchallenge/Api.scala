@@ -17,7 +17,9 @@ trait Api {
 
 
 trait JsonSupport extends SprayJsonSupport with DefaultJsonProtocol {
-  implicit val searchResultJsonWriter: RootJsonFormat[SearchResult] = new RootJsonFormat[SearchResult] {
+
+
+  implicit lazy val searchResultJsonWriter: RootJsonFormat[SearchResult] = new RootJsonFormat[SearchResult] {
     override def write(obj: SearchResult): JsValue = JsObject(
       "name" -> JsString(obj.city.name),
       "latitude" -> JsString(obj.city.latLong.latitude.toString),
@@ -36,6 +38,9 @@ trait JsonSupport extends SprayJsonSupport with DefaultJsonProtocol {
         score = Score.trim(fromField[String](js, "score").toDouble)
       )
   }
+
+  implicit lazy val suggestionsJsonFormat: RootJsonFormat[Suggestions] =
+    jsonFormat(Suggestions, "suggestions")
 }
 
 object ApiImpl {

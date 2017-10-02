@@ -104,6 +104,8 @@ object Scorer {
 
 case class SearchResult(city: City, score: Score)
 
+case class Suggestions(searchResults: List[SearchResult])
+
 case class SearchQuery(queryString: String, latLong: Option[LatLong], limit: Option[Int])
 
 /** Service Layer for performing Searches
@@ -111,17 +113,18 @@ case class SearchQuery(queryString: String, latLong: Option[LatLong], limit: Opt
   *           Future or Id
   */
 trait SearchingService[M[+_]] {
-  def search(searchQuery: SearchQuery): M[Seq[SearchResult]]
+  def search(searchQuery: SearchQuery): M[Suggestions]
 }
 
 /** Computes results from in-memory lookup of data, returns results synchronously through an `Id` */
 class InMemorySearchingService(cities: Seq[City], scorer: Scorer[(SearchQuery, City)])
   extends SearchingService[Id] {
 
-  def search(searchQuery: SearchQuery): Seq[SearchResult] =
+  def search(searchQuery: SearchQuery): Suggestions =
     cities.view
       .map(c => SearchResult(c, scorer.score((searchQuery, c))))
       .sortBy(_.score.toDouble)(implicitly[Ordering[Double]].reverse)
       .|>(results => searchQuery.limit.map(lim => results.take(lim)).getOrElse(results))
       .toList
+      .|>(Suggestions)
 }

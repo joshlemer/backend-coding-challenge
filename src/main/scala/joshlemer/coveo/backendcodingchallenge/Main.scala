@@ -24,7 +24,7 @@ object Main {
 }
 
 object TestRun {
-  def main(args: Array[String]): Unit = {
+//  def main(args: Array[String]): Unit = {
     implicit val searchingService: SearchingService[Id] =
       new InMemorySearchingService(
         cities = Geoname.loadCitiesInMemory("data/cities_canada-usa.tsv"),
@@ -33,6 +33,7 @@ object TestRun {
 
     searchingService
       .search(SearchQuery(queryString = "Abbotsford", latLong = Some(LatLong(55.0, 73.2)), limit = Some(10)))
+      .searchResults
       .foreach(println)
-  }
+//  }
 }
