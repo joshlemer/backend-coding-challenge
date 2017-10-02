@@ -69,17 +69,11 @@ object Geoname {
       )
     }
 
-    // noticed there's an extra empty space in the rows between population and elevation
-    def addElevationSpacer(header: String, index: Int): Int =
-      if(correctForElevation && index >= headers.indexOf("elevation")) index //+ 1
-      else index
-
-
     // array for performance
     val indexes: Array[Int] =
       headers
         .zipWithIndex
-        .map { case (h, ind) => addElevationSpacer(h, arr.indexOf(h)) }
+        .map { case (h, ind) => arr.indexOf(h) }
         .toArray
 
     body.map(_.split(separator)).map( row =>
