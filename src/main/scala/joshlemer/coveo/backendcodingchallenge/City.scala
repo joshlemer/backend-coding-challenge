@@ -1,11 +1,8 @@
 package joshlemer.coveo.backendcodingchallenge
 
 import ch.hsr.geohash.WGS84Point
-import ch.hsr.geohash.util.VincentyGeodesy
 
 case class LatLong(latitude: Double, longitude: Double) {
-  def point: WGS84Point = new WGS84Point(latitude, longitude)
-
   def distanceInMeters(that: LatLong): Double = LatLong.distance(this, that)
 }
 
@@ -29,6 +26,4 @@ object LatLong {
 }
 
 
-case class City(name: String, latLong: LatLong) {
-  lazy val point: WGS84Point = latLong.point
-}
+case class City(name: String, latLong: LatLong)

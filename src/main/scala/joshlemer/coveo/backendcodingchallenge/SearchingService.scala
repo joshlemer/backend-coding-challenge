@@ -1,20 +1,21 @@
 package joshlemer.coveo.backendcodingchallenge
 
 import scala.language.higherKinds
-import com.rockymadden.stringmetric.StringMetric
-import com.rockymadden.stringmetric.similarity.JaroMetric
 
 case class Score private (toDouble: Double) extends AnyVal
 
 object Score {
 
-  def from(double: Double): Option[Score] = if(0d <= double && double <= 1.0d) Some(Score(double)) else None
+  /** Returns The score if the double is in bounds, otherwise None */
+  def from(double: Double): Option[Score] =
+    if(0d <= double && double <= 1.0d) Some(Score(double)) else None
 
   /** Reduces the score to 0 or 1 if out of bounds */
   def trim(double: Double): Score = Score {
     if (double < 0d) 0d else if (double > 1d) 1d else double
   }
 
+  /** Compute Score from taking the weighted average of many other scores */
   def weightedAverage(score0: (Score, Double), scores: (Score, Double)*): Score = {
     require(((score0._2.toDouble +: scores.map(_._2.toDouble)).sum - 1.0).abs < 0.001,
       "Sum of weights must be about 1.0")
@@ -26,22 +27,16 @@ object Score {
 }
 
 trait Scorer[-T] { self =>
+  /** Evaluate an element */
   def score(elem: T): Score
 
+  /** Create a scorer that leverages this scorer, by transforming input to what this scorer takes */
   def contramap[TT](f: TT => T): Scorer[TT] = new Scorer[TT] {
     def score(elem: TT): Score = self.score(f(elem))
   }
 }
 
 object Scorer {
-
-  class WeightedAverageScorer[T](scorers: (Scorer[T], Double)*) extends Scorer[T] {
-    require((scorers.map(_._2).sum - 1.0).abs < 0.001, "Sum of weights must be about 1.0")
-
-    def score(elem: T): Score = Score.trim(
-      scorers.foldLeft(0D) { case (acc, (scorer, weight)) => acc + (scorer.score(elem).toDouble * weight) }
-    )
-  }
 
   object Distance {
 
@@ -51,14 +46,13 @@ object Scorer {
     /** Scores a 0 for antipodal cities, 1 for exactly precise cities, and linearly improves score along the way */
     class LinearScorer extends Scorer[(LatLong, LatLong)] {
       def score(elem: (LatLong, LatLong)): Score = Score.trim {
-        val x = 1d - ((elem._1 distanceInMeters elem._2) / HalfEarthsDiameterInMeters)
-        x
+        1d - ((elem._1 distanceInMeters elem._2) / HalfEarthsDiameterInMeters)
       }
     }
   }
 
 
-  /** Via longerst common substring / total target string size */
+  /** Scores by longest common substring divided by total target string size */
   case object StringScorer extends Scorer[(String, String)] {
     def longestSubstring(elem: (String, String)): String = {
       val (a, b) = elem
@@ -83,8 +77,10 @@ object Scorer {
     }
   }
 
+  /** By default, use String Scorer, and if a targit lat/long is present, weight that
+    * equally with the String Scorer
+    */
   val defaultScorer: Scorer[(SearchQuery, City)] = {
-
     val stringScorer =
      StringScorer.contramap[(SearchQuery, City)] { case (sq, c) => (sq.queryString, c.name)}
 
@@ -102,20 +98,23 @@ object Scorer {
           .getOrElse(stringComponent)
       }
     }
-
   }
 }
-
 
 
 case class SearchResult(city: City, score: Score)
 
 case class SearchQuery(queryString: String, latLong: Option[LatLong], limit: Option[Int])
 
+/** Service Layer for performing Searches
+  * @tparam M Higher kinded type to wrap results. Typically will be some kind of Monad like
+  *           Future or Id
+  */
 trait SearchingService[M[+_]] {
   def search(searchQuery: SearchQuery): M[Seq[SearchResult]]
 }
 
+/** Computes results from in-memory lookup of data, returns results synchronously through an `Id` */
 class InMemorySearchingService(cities: Seq[City], scorer: Scorer[(SearchQuery, City)])
   extends SearchingService[Id] {
 
