@@ -4,7 +4,7 @@ package joshlemer.coveo.backendcodingchallenge.parsing
 import java.nio.charset.Charset
 
 import better.files.{File, UnicodeDecoder}
-import joshlemer.coveo.backendcodingchallenge.City
+import joshlemer.coveo.backendcodingchallenge.{City, LatLong}
 
 import scala.util.Try
 
@@ -29,7 +29,7 @@ case class Geoname(
   tz: String,
   modified_at: String
 ) {
-  def toCity: City = City(name, lat, long)
+  def toCity: City = City(name, LatLong(lat, long))
 }
 
 object Geoname {
