@@ -17,11 +17,12 @@ object Score {
 
   /** Compute Score from taking the weighted average of many other scores */
   def weightedAverage(score0: (Score, Double), scores: (Score, Double)*): Score = {
-    require(((score0._2.toDouble +: scores.map(_._2.toDouble)).sum - 1.0).abs < 0.001,
+    val allScores = score0 +: scores
+    require((allScores.map(_._2.toDouble).sum - 1.0).abs < 0.001,
       "Sum of weights must be about 1.0")
 
     Score.trim(
-      (score0 +: scores).foldLeft(0d){ case (acc, (score, w)) => acc + (score.toDouble * w) }
+      allScores.foldLeft(0d){ case (acc, (score, w)) => acc + (score.toDouble * w) }
     )
   }
 }
@@ -43,11 +44,15 @@ object Scorer {
     /** Half the circumference of the Earth, the longest distance possible between two points */
     val HalfEarthsCircumferenceInMeters: Double = LatLong(0D, 0D) distanceInMeters LatLong(0D, 179.99D)
 
-    /** Scores a 0 for antipodal cities, 1 for exactly precise cities, and linearly improves score along the way */
-    class LinearScorer extends Scorer[(LatLong, LatLong)] {
-      def score(elem: (LatLong, LatLong)): Score = Score.trim {
+    /** Scores a 0 for antipodal cities, 1 for exactly precise cities, and linearly improves
+      * score along the way
+      *
+      * Could imagine a non-linear distance-based Scorer, like exponential drop off. Or driving time.
+      * */
+    case object LinearScorer extends Scorer[(LatLong, LatLong)] {
+      def score(elem: (LatLong, LatLong)): Score = Score.trim(
         1d - ((elem._1 distanceInMeters elem._2) / HalfEarthsCircumferenceInMeters)
-      }
+      )
     }
   }
 
@@ -85,7 +90,7 @@ object Scorer {
      StringScorer.contramap[(SearchQuery, City)] { case (sq, c) => (sq.queryString, c.name)}
 
     val distanceScorer =
-      (new Distance.LinearScorer).contramap[(LatLong, City)] { case (ll, c) => (ll, c.latLong)}
+      Distance.LinearScorer.contramap[(LatLong, City)] { case (ll, c) => (ll, c.latLong)}
 
     new Scorer[(SearchQuery, City)] {
       def score(elem: (SearchQuery, City)): Score = {
