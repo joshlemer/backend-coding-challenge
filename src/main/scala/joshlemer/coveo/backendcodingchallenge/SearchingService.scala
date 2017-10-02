@@ -41,12 +41,12 @@ object Scorer {
   object Distance {
 
     /** Half the circumference of the Earth, the longest distance possible between two points */
-    def HalfEarthsDiameterInMeters: Double = LatLong(0D, 0D) distanceInMeters LatLong(0D, 179.99D)
+    val HalfEarthsCircumferenceInMeters: Double = LatLong(0D, 0D) distanceInMeters LatLong(0D, 179.99D)
 
     /** Scores a 0 for antipodal cities, 1 for exactly precise cities, and linearly improves score along the way */
     class LinearScorer extends Scorer[(LatLong, LatLong)] {
       def score(elem: (LatLong, LatLong)): Score = Score.trim {
-        1d - ((elem._1 distanceInMeters elem._2) / HalfEarthsDiameterInMeters)
+        1d - ((elem._1 distanceInMeters elem._2) / HalfEarthsCircumferenceInMeters)
       }
     }
   }
