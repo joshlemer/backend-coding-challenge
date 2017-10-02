@@ -9,6 +9,7 @@ libraryDependencies := Seq(
   "ch.hsr" % "geohash" % "1.3.0",
 //  "com.rockymadden.stringmetric" % "stringmetric-core_2.11" % "0.27.4",
   "com.typesafe.akka" %% "akka-http" % "10.0.10",
-  "com.typesafe.akka" %% "akka-http-spray-json" % "10.0.10"
+  "com.typesafe.akka" %% "akka-http-spray-json" % "10.0.10",
+  "org.scalatest" %% "scalatest" % "3.0.1" % "test"
 )
     

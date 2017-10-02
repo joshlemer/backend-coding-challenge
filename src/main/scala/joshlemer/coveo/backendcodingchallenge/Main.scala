@@ -10,7 +10,7 @@ object Main {
     implicit val searchingService: SearchingService[Id] =
       new InMemorySearchingService(
         cities = Geoname.loadCitiesInMemory("data/cities_canada-usa.tsv"),
-        scorer = Scorer.defaultScorer
+        scorer = Scorer.getDefault
       )
 
     implicit val conf = Conf.defaults
@@ -28,7 +28,7 @@ object TestRun {
     implicit val searchingService: SearchingService[Id] =
       new InMemorySearchingService(
         cities = Geoname.loadCitiesInMemory("data/cities_canada-usa.tsv"),
-        scorer = Scorer.defaultScorer
+        scorer = Scorer.getDefault
       )
 
     searchingService

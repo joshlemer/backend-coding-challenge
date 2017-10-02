@@ -73,14 +73,14 @@ object Scorer {
       loop(Map.empty[(Int, Int), Int].withDefaultValue(0), (0, 0), 1, 1)
     }
     def score(elem: (String, String)): Score = Score.trim {
-      longestSubstring(elem._1, elem._2).length / elem._1.length
+      longestSubstring(elem._1, elem._2).length.toDouble / elem._1.length.toDouble
     }
   }
 
   /** By default, use String Scorer, and if a targit lat/long is present, weight that
     * equally with the String Scorer
     */
-  val defaultScorer: Scorer[(SearchQuery, City)] = {
+  val getDefault: Scorer[(SearchQuery, City)] = {
     val stringScorer =
      StringScorer.contramap[(SearchQuery, City)] { case (sq, c) => (sq.queryString, c.name)}
 
