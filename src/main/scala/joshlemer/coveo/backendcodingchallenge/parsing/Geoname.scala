@@ -100,6 +100,8 @@ object Geoname {
       )
     ).toIterator
   }
+
+  def loadCitiesInMemory(path: String): Seq[City] = parseFile(path).map(_.toCity).toSeq
 }
 
 

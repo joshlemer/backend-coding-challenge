@@ -75,7 +75,6 @@ class ApiImpl(
     }
 }
 
-case class Conf(interface: String, port: Int)
 
 class Services(
   implicit api: Api,
